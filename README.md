@@ -1,5 +1,7 @@
 # linreg
 
+This is a simple implementation of linear regression using gradient descent. The goal is to find the best fitting line for a multi-dimensional dataset.
+
 ### Data files
 
 Data files must be in CSV format, with the following structure:
