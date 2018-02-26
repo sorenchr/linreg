@@ -51,12 +51,12 @@ This project can be used from either the terminal, or as an imported package.
 ```console
 $ python linreg.py mydataset.csv
 Found the following parameters that best fits the data:
-intercept=2.0, size = 6499.998156236331
+intercept = 2.0, size = 6499.998156236331
 ```
 
 The following arguments are available:
 
-- ``-h``,``--help``: Displays help on usage
+- ``-h``,``--help``: Display help on usage
 - ``-a``,``--alpha``: Set the learning rate manually
 - ``-i``,``--iterations``: Set the number of iterations manually
 - ``-f``,``--force``: Force gradient descent and skip the normal equation method
