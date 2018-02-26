@@ -2,7 +2,7 @@
 
 This is a simple implementation of linear regression using a gradient descent algorithm. The goal is to find the best fitting line for a multi-dimensional dataset.
 
-![Linear regression](https://raw.githubusercontent.com/sorenchr/linreg/master/linreg.svg)
+![Linear regression](linreg.png)
 
 ### Data files
 
