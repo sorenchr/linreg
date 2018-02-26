@@ -3,7 +3,7 @@ import numpy as np
 import csv
 
 
-def _run(datafile):
+def _run(datafile, iterations, alpha):
     # Read CSV file into matrix and split into features and values
     headers, rows = _readcsv(datafile)
     matrix = np.matrix(rows)
@@ -15,13 +15,12 @@ def _run(datafile):
     features = scalefeatures(features)
 
     # Run gradient descent
-    alpha = 0.01
-    iterations = 1500
     history = gradientdescent(features, values, iterations, alpha)
     #costs = np.ravel(history[:, -1]).tolist()
 
     # Print the parameters for the features
-    output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeresult(headers, history[-1:, :-1]).items()])
+    featureparams = _mergeresult(headers, history[-1:, :-1])
+    output = ', '.join(['%s = %s' % (key, value) for (key, value) in featureparams.items()])
     print('Found the following parameters that best fits the data:\n' + output)
 
 
@@ -101,6 +100,8 @@ def _mergeresult(headers, params):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("data", type=str, help="the CSV file containing the data")
+    parser.add_argument('data', type=str, help='the CSV file containing the data')
+    parser.add_argument('-alpha', type=float, default=0.05)
+    parser.add_argument('-iterations', type=int, default=1500)
     args = parser.parse_args()
-    _run(args.data)
+    _run(args.data, args.iterations, args.alpha)
