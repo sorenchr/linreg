@@ -3,22 +3,26 @@ import numpy as np
 import csv
 
 
-def run(datafile):
+def _run(datafile):
     # Read CSV file into matrix and split into features and values
-    dataarray = readcsv(datafile)
-    matrix = np.matrix(dataarray)
+    headers, rows = readcsv(datafile)
+    matrix = np.matrix(rows)
     features = matrix[:, :-1]
     values = matrix[:, -1]
-    features = np.insert(features, 0, 1, axis=1)  # Left-pad the features with 1's
+    features = np.insert(features, 0, 1, axis=1)  # left-pad the features with 1's
 
     # Scale the features for better performance
     features = scalefeatures(features)
 
+    # Run gradient descent
     alpha = 0.01
     iterations = 1500
-
     history = gradientdescent(features, values, iterations, alpha)
-    costs = np.ravel(history[:, -1]).tolist()
+    #costs = np.ravel(history[:, -1]).tolist()
+
+    # Print the parameters for the features
+    output = ', '.join(['%s = %s' % (key, value) for (key, value) in mergeresult(headers, history[-1:, :-1]).items()])
+    print('Found the following parameters that best fits the data:\n' + output)
 
 
 def readcsv(file):
@@ -26,10 +30,10 @@ def readcsv(file):
     rows = []
     with open(file, newline='') as csvfile:
         reader = csv .reader(csvfile, delimiter=',', quotechar='"')
-        next(reader, None)  # headers
+        headers = next(reader, None)  # headers
         for row in reader:
             rows.append([float(x) for x in row])
-    return rows
+    return headers, rows
 
 
 def scalefeatures(matrix):
@@ -87,8 +91,16 @@ def cost(features, values, parameters):
     return np.asscalar((1/(2*m)) * np.ones((1, m)) * quaderrs)
 
 
+def mergeresult(headers, params):
+    """Merges the headers from the CSV file with the found parameters into a dictionary."""
+    result = {}
+    for i, header in enumerate(headers[:-1]):
+        result[header] = params.item(i)
+    return result
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("data", type=str, help="the CSV file containing the data")
     args = parser.parse_args()
-    run(args.data)
+    _run(args.data)
