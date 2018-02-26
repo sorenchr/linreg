@@ -1,10 +1,20 @@
 import argparse
 import numpy as np
 import csv
+import logging
+
+# Setup logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 
 def _run(datafile, iterations, alpha, force):
     # Read CSV file into matrix and split into features and values
+    logging.info('Reading {}'.format(datafile))
     headers, rows = _readcsv(datafile)
     matrix = np.matrix(rows)
     features = matrix[:, :-1]
@@ -13,9 +23,16 @@ def _run(datafile, iterations, alpha, force):
 
     # Determine if we should use the normal equation method
     if features.shape[0] <= 10000 and force is False:
+        logging.info('Less than 10,000 features, normal equation method is used')
         params = np.linalg.inv(features.T * features) * features.T * values
     else:
+        if force is True:
+            logging.info('Forcing gradient descent')
+        else:
+            logging.info('More than 10,000 features, gradient descent is used')
+
         # Scale the features for better performance
+        # logging.info('Scaling features for better performance')
         # scales = scalefeatures(features)
 
         # Run gradient descent
@@ -29,7 +46,7 @@ def _run(datafile, iterations, alpha, force):
     # Print the parameters for the features
     headers.insert(0, 'intercept')  # add the y-intercept as a feature itself
     output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeresult(headers, params).items()])
-    print('Found the following parameters that best fits the data:\n' + output)
+    logging.info('Found the following parameters that best fits the data:\n' + output)
 
 
 def _readcsv(file):
