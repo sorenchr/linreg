@@ -5,7 +5,7 @@ import csv
 
 def _run(datafile):
     # Read CSV file into matrix and split into features and values
-    headers, rows = readcsv(datafile)
+    headers, rows = _readcsv(datafile)
     matrix = np.matrix(rows)
     features = matrix[:, :-1]
     values = matrix[:, -1]
@@ -21,11 +21,11 @@ def _run(datafile):
     #costs = np.ravel(history[:, -1]).tolist()
 
     # Print the parameters for the features
-    output = ', '.join(['%s = %s' % (key, value) for (key, value) in mergeresult(headers, history[-1:, :-1]).items()])
+    output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeresult(headers, history[-1:, :-1]).items()])
     print('Found the following parameters that best fits the data:\n' + output)
 
 
-def readcsv(file):
+def _readcsv(file):
     """Read a CSV file into a multidimensional array of rows and columns."""
     rows = []
     with open(file, newline='') as csvfile:
@@ -91,7 +91,7 @@ def cost(features, values, parameters):
     return np.asscalar((1/(2*m)) * np.ones((1, m)) * quaderrs)
 
 
-def mergeresult(headers, params):
+def _mergeresult(headers, params):
     """Merges the headers from the CSV file with the found parameters into a dictionary."""
     result = {}
     for i, header in enumerate(headers[:-1]):
