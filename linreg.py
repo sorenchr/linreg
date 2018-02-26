@@ -3,7 +3,7 @@ import numpy as np
 import csv
 
 
-def _run(datafile, iterations, alpha):
+def _run(datafile, iterations, alpha, force):
     # Read CSV file into matrix and split into features and values
     headers, rows = _readcsv(datafile)
     matrix = np.matrix(rows)
@@ -11,16 +11,24 @@ def _run(datafile, iterations, alpha):
     values = matrix[:, -1]
     features = np.insert(features, 0, 1, axis=1)  # left-pad the features with 1's
 
-    # Scale the features for better performance
-    features = scalefeatures(features)
+    # Determine if we should use the normal equation method
+    if features.shape[0] <= 10000 and force is False:
+        params = np.linalg.inv(features.T * features) * features.T * values
+    else:
+        # Scale the features for better performance
+        # scales = scalefeatures(features)
 
-    # Run gradient descent
-    history = gradientdescent(features, values, iterations, alpha)
-    #costs = np.ravel(history[:, -1]).tolist()
+        # Run gradient descent
+        history = gradientdescent(features, values, iterations, alpha)
+        # costs = np.ravel(history[:, -1]).tolist()
+
+        # Get the best parameters from the history and scale them back up
+        # bestparams = np.multiply(history[-1:, :-1], scales.T)
+        params = history[-1:, :-1]
 
     # Print the parameters for the features
-    featureparams = _mergeresult(headers, history[-1:, :-1])
-    output = ', '.join(['%s = %s' % (key, value) for (key, value) in featureparams.items()])
+    headers.insert(0, 'intercept')  # add the y-intercept as a feature itself
+    output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeresult(headers, params).items()])
     print('Found the following parameters that best fits the data:\n' + output)
 
 
@@ -35,22 +43,25 @@ def _readcsv(file):
     return headers, rows
 
 
-def scalefeatures(matrix):
+def scalefeatures(features):
     """Scales the features of the matrix such that they are in the range [-1;1]."""
     colindex = -1
-    for column in matrix.T:  # Not costly, don't worry
+    n = features.shape[1]  # number of features
+    scales = np.ones((n, 1))
+    for column in features.T:
         colindex += 1
         stddev = np.max(column) - np.min(column)
 
-        if stddev == 0:  # Ignore features that don't change in value
+        if stddev == 0:  # ignore features that don't change in value
             continue
 
-        avg = np.full((matrix.shape[0], 1), np.average(column))
-        stddev = np.full((matrix.shape[0], 1), stddev)
+        avg = np.full((features.shape[0], 1), np.average(column))
+        stddev = np.full((features.shape[0], 1), stddev)
 
-        matrix[:, colindex] = (column.T - avg) / stddev
+        features[:, colindex] = (column.T - avg) / stddev
+        scales[colindex] = 1 / stddev.item(colindex)
 
-    return matrix
+    return scales
 
 
 def gradientdescent(features, values, iterations, alpha):
@@ -101,7 +112,9 @@ def _mergeresult(headers, params):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data', type=str, help='the CSV file containing the data')
-    parser.add_argument('-alpha', type=float, default=0.05)
-    parser.add_argument('-iterations', type=int, default=1500)
+    parser.add_argument('-a', '--alpha', type=float, default=0.01, help='the learning rate for gradient descent')
+    parser.add_argument('-i', '--iterations', type=int, default=1500,
+                        help='the number of iterations for gradient descent')
+    parser.add_argument('-f', '--force', action='store_true', default=False, help='skip the normal equation fallback')
     args = parser.parse_args()
-    _run(args.data, args.iterations, args.alpha)
+    _run(args.data, args.iterations, args.alpha, args.force)

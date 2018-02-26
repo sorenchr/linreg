@@ -14,6 +14,7 @@ The algorithm will return the best fitting line for any multidimensional dataset
 
 ## Features
 
+* Fallback to using the normal equation method for datasets with less than 10,000 features
 * Automatic feature scaling
 * Customizable parameters (learning rate, iterations)
 * Multidimensional data support
@@ -50,8 +51,15 @@ This project can be used from either the terminal, or as an imported package.
 ```console
 $ python linreg.py mydataset.csv
 Found the following parameters that best fits the data:
-size = 6499.998156236331
+intercept=2.0, size = 6499.998156236331
 ```
+
+The following arguments are available:
+
+- ``-h``,``--help``: Displays help on usage
+- ``-a``,``--alpha``: Set the learning rate manually
+- ``-i``,``--iterations``: Set the number of iterations manually
+- ``-f``,``--force``: Force gradient descent and skip the normal equation method
 
 ### Imported package
 
@@ -63,7 +71,7 @@ features = np.asmatrix(np.random.rand(3, 3))
 values = np.random.rand(3, 1)
 
 # Feature scaling
-features = linreg.scalefeatures(features)
+scales = linreg.scalefeatures(features)
 
 # Gradient descent
 iterations = 1500
