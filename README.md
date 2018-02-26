@@ -2,7 +2,13 @@
 
 This is a simple implementation of linear regression using a gradient descent algorithm. The goal is to find the best fitting line for a multi-dimensional dataset.
 
-![Linear regression](linreg.png)
+<p align="center">
+    <img
+      alt="Linear regression"
+      src="linreg.png"
+      width="467"
+    />
+</p>
 
 ### Data files
 
