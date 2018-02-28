@@ -12,40 +12,38 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 
-def _run(datafile, iterations, alpha, force):
+def _run(datafile, iterations, alpha, force, scaling):
     # Read CSV file into matrix and split into features and values
     logging.info('Reading {}'.format(datafile))
     headers, rows = _readcsv(datafile)
+    headers.insert(0, 'intercept')  # add the y-intercept as a feature header itself
     matrix = np.matrix(rows)
     features = matrix[:, :-1]
     values = matrix[:, -1]
     features = np.insert(features, 0, 1, axis=1)  # left-pad the features with 1's
 
-    # Determine if we should use the normal equation method
+    # Determine if we should use the normal equation method or gradient descent
     if features.shape[0] <= 10000 and force is False:
         logging.info('Less than 10,000 features, normal equation method is used')
         params = np.linalg.inv(features.T * features) * features.T * values
     else:
-        if force is True:
-            logging.info('Forcing gradient descent')
-        else:
-            logging.info('More than 10,000 features, gradient descent is used')
+        logging.info('Using gradient descent (less than 10,000 features or forced)')
 
         # Scale the features for better performance
-        # logging.info('Scaling features for better performance')
-        # scales = scalefeatures(features)
+        if scaling:
+            logging.info('Scaling features for better performance')
+            scales = scalefeatures(features)
+            output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeheaders(headers, scales).items()])
+            logging.info('Scaled features with the following scales: \n' + output)
 
         # Run gradient descent
         history = gradientdescent(features, values, iterations, alpha)
-        # costs = np.ravel(history[:, -1]).tolist()
 
-        # Get the best parameters from the history and scale them back up
-        # bestparams = np.multiply(history[-1:, :-1], scales.T)
+        # Get the best parameters from the history
         params = history[-1:, :-1]
 
     # Print the parameters for the features
-    headers.insert(0, 'intercept')  # add the y-intercept as a feature itself
-    output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeresult(headers, params).items()])
+    output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeheaders(headers, params).items()])
     logging.info('Found the following parameters that best fits the data:\n' + output)
 
 
@@ -118,7 +116,7 @@ def cost(features, values, parameters):
     return np.asscalar((1/(2*m)) * np.ones((1, m)) * quaderrs)
 
 
-def _mergeresult(headers, params):
+def _mergeheaders(headers, params):
     """Merges the headers from the CSV file with the found parameters into a dictionary."""
     result = {}
     for i, header in enumerate(headers[:-1]):
@@ -133,5 +131,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--iterations', type=int, default=1500,
                         help='the number of iterations for gradient descent')
     parser.add_argument('-f', '--force', action='store_true', default=False, help='skip the normal equation fallback')
+    parser.add_argument('-ns', '--noscaling', action='store_true', default=False, help='turn off feature scaling')
     args = parser.parse_args()
-    _run(args.data, args.iterations, args.alpha, args.force)
+    _run(args.data, args.iterations, args.alpha, args.force, not args.noscaling)

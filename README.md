@@ -44,7 +44,7 @@ I recommend that you use a [virtual environment](http://docs.python-guide.org/en
 
 ## Usage
 
-This project can be used from either the terminal, or as an imported package.
+This project can be used from either the terminal, or as an imported module.
 
 ### Terminal
 
@@ -57,11 +57,12 @@ intercept = 2.0, size = 6499.998156236331
 The following arguments are available:
 
 - ``-h``,``--help``: Display help on usage
-- ``-a``,``--alpha``: Set the learning rate manually
-- ``-i``,``--iterations``: Set the number of iterations manually
+- ``-a``,``--alpha``: Set the learning rate manually (default is 0.01)
+- ``-i``,``--iterations``: Set the number of iterations manually (default is 1500)
 - ``-f``,``--force``: Force gradient descent and skip the normal equation method
+- ``-ns``,``--noscaling``: Turn off feature scaling (there is no feature scaling when using the normal equation method)
 
-### Imported package
+### Imported module
 
 ```python
 import linreg
