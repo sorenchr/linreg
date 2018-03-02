@@ -87,20 +87,9 @@ def gradientdescent(features, values, iterations, alpha):
     params = np.zeros((n, 1))
 
     for itr in range(iterations):
-        newparams = np.zeros((n, 1))
-
-        # Iterate through all parameters
-        for j in range(n):
-            # Iterate through all test sets to compute the delta sum
-            deltasum = 0
-            for i in range(m):
-                deltasum += (params.T * features[i, :].T - values.item(i)) * features.item((i, j))
-
-            # Compute the theta update
-            newparams[j] = params.item(j) - alpha * (1/m) * deltasum
-
-        # Update the params
-        params = newparams
+        # Perform vectorized gradient descent
+        gradient = (alpha / m) * features.T * (features * params - values)
+        params = params - gradient
 
         # Store the parameters and their associated cost in the history matrix
         history[itr, :-1] = params.T
