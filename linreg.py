@@ -46,6 +46,10 @@ def _run(datafile, iterations, alpha, force, scaling):
     output = ', '.join(['%s = %s' % (key, value) for (key, value) in _mergeheaders(headers, params).items()])
     logging.info('Found the following parameters that best fits the data:\n' + output)
 
+    # Test parameters and print accuracy
+    paramscost = cost(features, values, params)
+    logging.info('Parameters cost: %s' % paramscost)
+
 
 def _readcsv(file):
     """Read a CSV file into a multidimensional array of rows and columns."""
