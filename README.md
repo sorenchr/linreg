@@ -77,7 +77,7 @@ scales = linreg.scalefeatures(features)
 # Gradient descent
 iterations = 1500
 alpha = 0.01
-print(linreg.gradientdescent(features, values, 1500, 0.01))
+print(linreg.gradientdescent(features, values, iterations, alpha))
 
 # Cost
 parameters = np.random.rand(3, 1)
